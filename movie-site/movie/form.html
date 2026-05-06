@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>영화 후기 작성</title>
+</head>
+<body>
+    <h1>영화 감상 후기 남기기</h1>
+    
+    <form action="#" method="get">
+        <label for="reviewer">작성자 이름:</label>
+        <input type="text" id="reviewer" name="reviewer" placeholder="이름을 입력하세요"><br><br>
+
+        <label for="movie-select">관람한 영화 선택:</label>
+        <select id="movie-select" name="movie-select">
+            <option value="matrix">매트릭스</option>
+            <option value="spiderman">스파이더맨: 어크로스 더 유니버스</option>
+        </select><br><br>
+
+        <label for="review-text">상세 후기:</label><br>
+        <textarea id="review-text" name="review-text" rows="5" cols="40" placeholder="영화에 대한 자유로운 감상을 남겨주세요."></textarea><br><br>
+
+        <button type="submit">후기 제출하기</button>
+    </form>
+    
+    <br>
+    <a href="../index.html">메인으로 돌아가기</a>
+</body>
+</html>
