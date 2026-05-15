@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>프로그래머 계산기</title>
+    <style>
+                /* 기본 배경 및 폰트 설정 */
+        body {
+            background-color: #e0e5ec; /* 부드러운 그레이 블루 배경 */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* 계산기 본체: 뉴모피즘 입체 효과 */
+        .calculator {
+            width: 340px;
+            padding: 25px;
+            border-radius: 30px;
+            background-color: #e0e5ec;
+            box-shadow: 9px 9px 16px rgb(163, 177, 198, 0.6), 
+                        -9px -9px 16px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 결과창: 안으로 움푹 들어간 효과 */
+        #display {
+            width: 100%;
+            height: 60px;
+            border: none;
+            outline: none;
+            background-color: #e0e5ec;
+            border-radius: 12px;
+            box-shadow: inset 6px 6px 12px #b8bec5, 
+                        inset -6px -6px 12px #ffffff;
+            font-size: 28px;
+            color: #444;
+            text-align: right;
+            padding: 0 15px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            font-family: 'Consolas', monospace; /* 숫자 가독성을 위한 고정폭 글꼴 */
+        }
+
+        /* 버튼 그리드 */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        /* 공통 버튼 스타일 */
+        button {
+            height: 55px;
+            border: none;
+            border-radius: 15px;
+            background-color: #e0e5ec;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease; /* 부드러운 반응 */
+            box-shadow: 5px 5px 10px #b8bec5, 
+                        -5px -5px 10px #ffffff;
+        }
+
+        /* 버튼 클릭 시 눌리는 효과 */
+        button:active {
+            box-shadow: inset 2px 2px 5px #b8bec5, 
+                        inset -2px -2px 5px #ffffff;
+            transform: scale(0.98);
+        }
+
+        /* 비활성화된 버튼 */
+        button:disabled {
+            color: #bbb;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        /* 프로그래머 모드 버튼 (포인트 컬러) */
+        .prog-btn {
+            grid-column: span 4;
+            background: linear-gradient(145deg, #e6e6e6, #ffffff);
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        /* 활성화된 모드 (강조색) */
+        .active-mode {
+            color: #ffffff !important;
+            background: #3498db !important;
+            box-shadow: inset 2px 2px 5px #2980b9, 
+                        5px 5px 10px #b8bec5;
+        }
+
+        /* 등호(=) 버튼: 전문적인 느낌의 강조 */
+        .equal {
+            background: #2ecc71;
+            color: white;
+            box-shadow: 5px 5px 10px #b8bec5, 
+                        -2px -2px 5px rgba(46, 204, 113, 0.3);
+        }
+
+        .equal:active {
+            background: #27ae60;
+        }
+
+        /* 가로 확장 버튼 */
+        .col-2 { grid-column: span 2; }
+
+        /* 호버 시 살짝 밝아짐 */
+        button:hover:not(:disabled):not(.active-mode) {
+            color: #333;
+            background-color: #e6eef7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" id="display" disabled>
+        
+        <div class="buttons">
+            <button onclick="toggleProgrammerMode()" id="modeToggle" class="col-4 prog-btn">프로그래머 모드: OFF</button>
+            
+            <button onclick="convertToBase(2)" class="base-btn" disabled>2진수</button>
+            <button onclick="convertToBase(8)" class="base-btn" disabled>8진수</button>
+            <button onclick="convertToBase(16)" class="base-btn" disabled>16진수</button>
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="deleteLast()">DEL</button>
+
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('/')">/</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('*')">*</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('-')">-</button>
+            
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="calculate()" class="equal">=</button>
+            <button onclick="appendToDisplay('+')">+</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const baseButtons = document.querySelectorAll('.base-btn');
+        const modeToggle = document.getElementById('modeToggle');
+        let isProgrammerMode = false;
+
+        // 1. 프로그래머 모드 토글 함수
+        function toggleProgrammerMode() {
+            isProgrammerMode = !isProgrammerMode;
+            
+            if (isProgrammerMode) {
+                modeToggle.innerText = "프로그래머 모드: ON";
+                modeToggle.classList.add('active-mode');
+                // 버튼 활성화
+                baseButtons.forEach(btn => btn.disabled = false);
+            } else {
+                modeToggle.innerText = "프로그래머 모드: OFF";
+                modeToggle.classList.remove('active-mode');
+                // 버튼 비활성화
+                baseButtons.forEach(btn => btn.disabled = true);
+            }
+        }
+
+        // 2. 진법 변환 함수
+        function convertToBase(base) {
+            try {
+                // 현재 입력된 값을 숫자로 변환 (수식이면 계산 후 변환)
+                let currentVal = eval(display.value);
+                if (isNaN(currentVal)) throw "Error";
+                
+                // 해당 진법으로 변환하여 출력 (16진수는 대문자로)
+                display.value = currentVal.toString(base).toUpperCase();
+            } catch (e) {
+                display.value = "Error";
+            }
+        }
+
+        // 기존 기본 기능들
+      function appendToDisplay(input) {
+            const display = document.getElementById('display');
+            const lastChar = display.value.slice(-1); // 마지막 글자 가져오기
+            const operators = ['+', '-', '*', '/']; // 체크할 연산자들
+
+            // 1. 처음부터 연산자를 입력하려고 할 때 (단, 마이너스(-)는 음수 표현을 위해 허용할 수 있음)
+            if (display.value === "" && operators.includes(input)) {
+                if (input === '-') {
+                    display.value += input; // 첫 입력이 '-'인 경우만 허용
+                }
+                return; // 그 외 연산자는 무시
+            }
+
+            // 2. 연산자가 연속으로 입력되지 않도록 방지 (예: ++, */ 등)
+            if (operators.includes(lastChar) && operators.includes(input)) {
+                // 기존 연산자를 지우고 새 연산자로 교체하고 싶다면 아래 주석 해제
+                // display.value = display.value.slice(0, -1); 
+                return; // 지금은 그냥 무시하도록 설정
+            }
+
+            // 3. 소수점(.)이 중복으로 들어가지 않도록 방지
+            if (input === '.' && lastChar === '.') return;
+
+            display.value += input;
+        }
+
+        function clearDisplay() {
+            display.value = "";
+        }
+
+        function calculate() {
+            try {
+                display.value = eval(display.value);
+            } catch (error) {
+                display.value = "Error";
+            }
+        }
+
+        function deleteLast() {
+            const display = document.getElementById('display');
+            // 현재 입력된 값에서 마지막 글자 하나를 잘라내고 다시 대입합니다.
+            display.value = display.value.slice(0, -1);
+        }
+    </script>
+</body>
+</html>
